@@ -5,18 +5,30 @@ dataset = "08 02 22 97 38 15 00 40 00 75 04 05 07 78 52 12 50 77 91 08;49 49 99 
 data_list = dataset.split(";")
 matrix = map(lambda x:x.split(" "),data_list[:-1])
 matrix = map(lambda x:map(lambda u:int(u),x),matrix)
-print matrix
-maximum = []
-for i in range(20):
-    for j in range(20):
-        if i < 16:
-            current = matrix[i%20][j] * matrix[(i+1)%20][j] * matrix[(i+2)%20][j] * matrix[(i+3)%20][j]
-            maximum.append(current)
-        if j < 16:
-            current = matrix[i][j%20]* matrix[i][(j+1)%20] * matrix[i][(j+2)%20] * matrix[i][(j+3)%20]
-            maximum.append(current)
-        if j < 16 or i < 16:
-            current = matrix[i%20][j%20] * matrix[(i+1)%20][(j+1)%20] * matrix[(i+2)%20][(j+2)%20] * matrix[(i+3)%20][(j+3)%20]
-            maximum.append(current)
-print max(maximum)
-print 1788696 in maximum
+largest = 1
+def product_in_direction(grid, start, direction, steps):
+    x0, y0 = start
+    dx, dy = direction
+
+    if  not(0 <= y0                  < len(grid) and
+            0 <= y0 + (steps - 1)*dy < len(grid) and
+            0 <= x0                  < len(grid[y0]) and
+            0 <= x0 + (steps - 1)*dx < len(grid[y0])):
+        return 0
+
+    product = 1
+    for n in range(steps):
+        product *= grid[y0 + n*dy][x0 + n*dx]
+    return product
+grid = matrix
+#horizontal and vertical
+for y in range(len(grid)):
+    for x in range(len(grid[y])):
+        largest = max(
+            product_in_direction(grid, (x, y),   (1,  0), 4), # horizontal
+            product_in_direction(grid, (x, y),   (0,  1), 4), # vertical
+            product_in_direction(grid, (x, y  ), (1,  1), 4), # right diagonal
+            product_in_direction(grid, (x, y+3), (1, -1), 4), # left diagonal
+            largest,
+        )
+print largest
